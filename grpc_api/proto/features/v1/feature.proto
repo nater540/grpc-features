@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package features.v1;
+
+option go_package = "features/v1";
+option csharp_namespace = "Features.V1";
+
+message StreamFeaturesRequest {
+  string api_key = 1;
+  optional string project_guid = 2;
+}
+
+message StreamFeaturesResponse {
+  oneof feature_response {
+    FeatureList list = 1;
+    Feature created  = 2;
+    Feature updated  = 3;
+    Feature deleted  = 4;
+  }
+}
+
+// Initial list of features when a stream connection is initialized.
+message FeatureList {
+  repeated Feature features = 1;
+}
+
+// Represents a single feature.
+message Feature {
+  // Humanized feature name.
+  string name = 1;
+
+  // Feature key; generally just the slugified name.
+  string key = 2;
+
+  // Internal feature UUID.
+  string uuid = 3;
+
+  // Optional feature description.
+  optional string description = 4;
+
+  // Whether or not the feature is enabled.
+  bool enabled = 5;
+
+  // Optional custom feature tags.
+  repeated string tags = 20;
+}

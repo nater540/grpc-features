@@ -1,0 +1,71 @@
+{
+  "rabbit_version": "3.8.16",
+  "vhosts": [{
+    "name": "features"
+  }],
+  "topic_permissions": [],
+  "parameters": [],
+  "policies": [],
+  "queues": [
+    {
+      "name": "features-broadcast.work",
+      "vhost": "features",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "features-broadcast.dead",
+        "x-message-ttl": 5000
+      }
+    },
+    {
+      "name": "features-broadcast.dead",
+      "vhost": "features",
+      "durable": false,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "features-broadcast.work",
+      "vhost": "features",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "alternate-exchange": "features-broadcast.dead",
+        "x-match": "any"
+      }
+    },
+    {
+      "name": "features-broadcast.dead",
+      "vhost": "features",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "features-broadcast.work",
+      "vhost": "features",
+      "destination": "features-broadcast.work",
+      "destination_type": "queue",
+      "routing_key": "work",
+      "arguments": {
+        "routing_key": "work"
+      }
+    },
+    {
+      "source": "features-broadcast.dead",
+      "vhost": "features",
+      "destination": "features-broadcast.dead",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

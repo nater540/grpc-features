@@ -1,0 +1,13 @@
+[package]
+name = "grpc_api"
+version = "0.1.0"
+authors = ["Nate Strandberg <nater540@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+prost = "0.7.0"
+tonic = "0.4.3"
+tonic-types = "0.2.0"
+
+[build-dependencies]
+tonic-build = "0.4.2"

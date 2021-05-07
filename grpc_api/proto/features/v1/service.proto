@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package features.v1;
+
+option go_package = "features/v1";
+option csharp_namespace = "Features.V1";
+
+import "features/v1/feature.proto";
+
+service Features {
+  rpc AllFeatures(features.v1.StreamFeaturesRequest) returns (stream features.v1.StreamFeaturesResponse) {}
+}

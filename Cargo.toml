@@ -1,0 +1,6 @@
+[workspace]
+members = ["grpc_api", "feature_server"]
+
+[profile.dev]
+# See https://jakedeichert.com/blog/reducing-rust-incremental-compilation-times-on-macos-by-70-percent
+split-debuginfo = "unpacked"
