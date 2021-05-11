@@ -30,17 +30,17 @@ message Feature {
   string name = 1;
 
   // Feature key; generally just the slugified name.
-  string key = 2;
+  //string key = 2;
 
   // Internal feature UUID.
-  string uuid = 3;
+  //string uuid = 3;
 
   // Optional feature description.
-  optional string description = 4;
+  //optional string description = 4;
 
   // Whether or not the feature is enabled.
-  bool enabled = 5;
+  //bool enabled = 5;
 
   // Optional custom feature tags.
-  repeated string tags = 20;
+  //repeated string tags = 20;
 }

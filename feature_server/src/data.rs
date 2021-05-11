@@ -22,6 +22,7 @@ pub struct DataInner {
   pub amqp: Arc<RabbitMQ>,
   pub db_path: String,
   pub amqp_path: String,
+  pub amqp_queue: String,
   pub env: String,
   pub server_pid: u32
 }
@@ -56,7 +57,8 @@ impl Data {
 
     let amqp = Arc::new(RabbitMQ::new(&amqp_path).await?);
 
-    let server_pid = std::process::id();
+    let server_pid   = std::process::id();
+    let amqp_queue = opts.amqp_queue.clone();
     let env        = opts.env.clone();
 
     let inner = DataInner {
@@ -64,6 +66,7 @@ impl Data {
       env,
       db_path,
       amqp_path,
+      amqp_queue,
       server_pid
     };
 

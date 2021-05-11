@@ -1,16 +1,56 @@
-use lapin::{Channel, Connection, ConnectionProperties};
-use tokio::sync::RwLock;
+use lapin::{Channel, Connection, ConnectionProperties, options::{BasicAckOptions, BasicConsumeOptions}, types::FieldTable};
+use tokio::{sync::RwLock, task::JoinHandle};
 use tokio_amqp::*;
+use anyhow::Result;
+
+mod message;
+pub(crate) use message::*;
 
 #[derive(Debug)]
 pub struct RabbitMQ {
-  pub conn: RwLock<Connection> // TODO: Might not be necessary to keep this in a RwLock
+  pub conn: RwLock<Connection>,
+  pub channel: RwLock<Channel>
 }
 
 impl RabbitMQ {
-  pub async fn new(amqp_path: &str) -> anyhow::Result<RabbitMQ> {
+  pub async fn new(amqp_path: &str) -> Result<RabbitMQ> {
     let conn = Connection::connect(amqp_path, ConnectionProperties::default().with_tokio()).await?;
+    let channel = conn.create_channel().await?;
+    Ok(RabbitMQ { conn: RwLock::new(conn), channel: RwLock::new(channel) })
+  }
 
-    Ok(RabbitMQ { conn: RwLock::new(conn) })
+  pub async fn start_listener(&self, amqp_queue: &str) -> Result<(async_channel::Receiver<Message>, JoinHandle<Result<(), anyhow::Error>>)> {
+    let channel = self.channel.read().await;
+    let mut consumer = channel.basic_consume(
+      amqp_queue,
+      "",
+      BasicConsumeOptions::default(),
+      FieldTable::default()
+    ).await?;
+
+    let (tx, rx) = async_channel::unbounded::<Message>();
+
+    let listen_task = tokio::spawn(async move {
+      let listen_tx = tx.clone();
+
+      loop {
+        use futures::stream::StreamExt;
+        use std::convert::TryFrom;
+
+        while let Some(delivery) = consumer.next().await {
+          if let Ok((_channel, delivery)) = delivery {
+            let message = Message::try_from(&delivery)?;
+            info!("Received message: {}", message.payload.test.clone());
+            listen_tx.send(message).await?;
+
+            delivery.ack(BasicAckOptions::default()).await?;
+          }
+        }
+      }
+
+      Ok::<(), anyhow::Error>(()) // Type annotation to appease the rust compiler :)
+    });
+
+    Ok((rx, listen_task))
   }
 }

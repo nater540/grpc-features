@@ -13,7 +13,7 @@ pub struct Opt {
   pub db_name: Option<String>,
 
   /// PostgreSQL server host.
-  #[structopt(long, env = "FEATURES_DB_HOST")]
+  #[structopt(long, env = "FEATURES_DB_HOST", default_value = "localhost")]
   pub db_host: String,
 
   /// PostgreSQL server port.
@@ -21,11 +21,11 @@ pub struct Opt {
   pub db_port: String,
 
   /// PostgreSQL server username.
-  #[structopt(long, env = "FEATURES_DB_USERNAME")]
+  #[structopt(long, env = "FEATURES_DB_USERNAME", default_value = "features")]
   pub db_username: String,
 
   /// PostgreSQL server password.
-  #[structopt(long, env = "FEATURES_DB_PASSWORD")]
+  #[structopt(long, env = "FEATURES_DB_PASSWORD", default_value = "SuperKawaii#1")]
   pub db_password: String,
 
   /// AMQP (RabbitMQ) server host.
@@ -37,14 +37,18 @@ pub struct Opt {
   pub amqp_port: String,
 
   /// AMQP (RabbitMQ) server username.
-  #[structopt(long, env = "AMQP_USERNAME")]
+  #[structopt(long, env = "AMQP_USERNAME", default_value = "wabbit")]
   pub amqp_username: String,
 
   /// AMQP (RabbitMQ) server password.
-  #[structopt(long, env = "AMQP_PASSWORD")]
+  #[structopt(long, env = "AMQP_PASSWORD", default_value = "password")]
   pub amqp_password: String,
 
   /// AMQP (RabbitMQ) server virtual host.
   #[structopt(long, env = "AMQP_VHOST", default_value = "features")]
-  pub amqp_vhost: String
+  pub amqp_vhost: String,
+
+  /// AMQP (RabbitMQ) server queue name.
+  #[structopt(long, env = "AMQP_QUEUE", default_value = "features-broadcast.work")]
+  pub amqp_queue: String
 }

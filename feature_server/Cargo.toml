@@ -13,12 +13,14 @@ grpc_api = { path = "../grpc_api" }
 anyhow = "1.0"
 async-stream = "0.3"
 async-channel = "1.6.1"
+futures-util = "0.3.15"
 tokio = { version = "1.5.0", features = ["full"] }
 tokio-stream = { version =  "0.1", features = ["net"] }
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
 serde = { version = "1.0", features = ["derive"] }
 structopt = "0.3"
 tonic = "0.4.3"
+tonic-reflection = "0.1"
 serde_json = "1.0"
 pin-project = "1.0"
 lapin = "1.7.1"
@@ -27,6 +29,7 @@ uuid = "0.8"
 
 # Logging
 log = "0.4"
+pretty_env_logger = "0.4.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 jemallocator = "0.3.2"
