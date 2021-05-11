@@ -1,5 +1,5 @@
 use lapin::{Channel, Connection, ConnectionProperties, options::{BasicAckOptions, BasicConsumeOptions}, types::FieldTable};
-use tokio::{sync::RwLock, task::JoinHandle};
+use tokio::{sync::RwLock, sync::broadcast, task::JoinHandle};
 use tokio_amqp::*;
 use anyhow::Result;
 
@@ -19,7 +19,7 @@ impl RabbitMQ {
     Ok(RabbitMQ { conn: RwLock::new(conn), channel: RwLock::new(channel) })
   }
 
-  pub async fn start_listener(&self, amqp_queue: &str) -> Result<(async_channel::Receiver<Message>, JoinHandle<Result<(), anyhow::Error>>)> {
+  pub async fn start_listener(&self, amqp_queue: &str) -> Result<(broadcast::Sender<Message>, JoinHandle<Result<(), anyhow::Error>>)> {
     let channel = self.channel.read().await;
     let mut consumer = channel.basic_consume(
       amqp_queue,
@@ -28,10 +28,11 @@ impl RabbitMQ {
       FieldTable::default()
     ).await?;
 
-    let (tx, rx) = async_channel::unbounded::<Message>();
+    //let (tx, rx) = async_channel::unbounded::<Message>();
+    let (tx, rx) = broadcast::channel::<Message>(69);
 
+    let listen_tx = tx.clone();
     let listen_task = tokio::spawn(async move {
-      let listen_tx = tx.clone();
 
       loop {
         use futures::stream::StreamExt;
@@ -41,7 +42,7 @@ impl RabbitMQ {
           if let Ok((_channel, delivery)) = delivery {
             let message = Message::try_from(&delivery)?;
             info!("Received message: {}", message.payload.test.clone());
-            listen_tx.send(message).await?;
+            listen_tx.send(message)?;
 
             delivery.ack(BasicAckOptions::default()).await?;
           }
@@ -51,6 +52,6 @@ impl RabbitMQ {
       Ok::<(), anyhow::Error>(()) // Type annotation to appease the rust compiler :)
     });
 
-    Ok((rx, listen_task))
+    Ok((tx, listen_task))
   }
 }

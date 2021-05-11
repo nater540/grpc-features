@@ -1,6 +1,6 @@
 use tonic::{Request, Response, Status};
-use futures_util::pin_mut;
-use tokio::sync::RwLock;
+// use futures_util::pin_mut;
+use tokio::sync::broadcast;
 use futures::Stream;
 use std::sync::Arc;
 use std::pin::Pin;
@@ -16,14 +16,13 @@ pub type FeaturesServer = grpc_api::server::FeaturesServer<FeatureServer>;
 
 pub struct FeatureServer {
   pub data: Arc<Data>,
-  pub amqp_rx: async_channel::Receiver<Message>
+  pub amqp_rx: broadcast::Sender<Message>
   // pub amqp_rx: RwLock<async_channel::Receiver<Message>>
 }
 
 impl FeatureServer {
-  pub fn new(data: Data, amqp_rx: async_channel::Receiver<Message>) -> Self {
+  pub fn new(data: Data, amqp_rx: broadcast::Sender<Message>) -> Self {
     let data = Arc::new(data);
-    // let ampq_rx = RwLock::new(ampq_rx);
 
     FeatureServer {
       data,
@@ -40,7 +39,7 @@ impl Features for FeatureServer {
     use stream_features_response::FeatureResponse;
     info!("AllFeatures = {:?}", request);
 
-    let amqp_rx = self.amqp_rx.clone();
+    let mut amqp_rx = self.amqp_rx.subscribe();
 
     let output = async_stream::try_stream! {
       // TODO: Yield the initial set of features
