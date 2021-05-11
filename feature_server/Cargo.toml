@@ -12,6 +12,7 @@ path = "src/bin/feature_server.rs"
 grpc_api = { path = "../grpc_api" }
 anyhow = "1.0"
 async-stream = "0.3"
+async-channel = "1.6.1"
 tokio = { version = "1.5.0", features = ["full"] }
 tokio-stream = { version =  "0.1", features = ["net"] }
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
